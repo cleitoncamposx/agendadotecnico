@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   templateUrl: './novo.html',
   styleUrl: './novo.scss',
 })
-export class Novo {}
+export class Novo {
+
+}

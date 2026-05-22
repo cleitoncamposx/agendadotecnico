@@ -1,0 +1,1 @@
+import{Mb as a,Nb as o,hc as m,pb as t}from"./chunk-E4HIYTSC.js";var s=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=t({type:n,selectors:[["app-agendamento"]],decls:2,vars:0,template:function(e,d){e&1&&(a(0,"p"),m(1,"agendamento works!"),o())},encapsulation:2})};export{s as Agendamento};

@@ -2,14 +2,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 
-import {
-  ApplicationConfig,
-  importProvidersFrom,
-  provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection,
-  isDevMode,
-  provideAppInitializer,
-} from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, isDevMode, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 
 import { PoHttpRequestModule } from '@po-ui/ng-components';
@@ -23,14 +16,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     importProvidersFrom([PoHttpRequestModule]),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])), 
     provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
-    }),
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          })
   ],
+  
 };
-
 
 const init = () => {
   console.log('Inicializando...')

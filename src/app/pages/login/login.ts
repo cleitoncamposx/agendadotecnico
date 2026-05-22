@@ -1,12 +1,23 @@
 import { Component } from '@angular/core';
+import { PoFieldModule } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [PoFieldModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
+
 export class Login {
-  login : string = '';
-  
+
+  public titulo: string = 'Titulo';
+  login: string ;
+
+  constructor() {
+    this.login = '';
+  }
+
+  public fnClick() {
+
+  }
 }

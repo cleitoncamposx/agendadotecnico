@@ -1,0 +1,1 @@
+import{Mb as n,Nb as i,hc as o,pb as t}from"./chunk-E4HIYTSC.js";var r=class a{static \u0275fac=function(e){return new(e||a)};static \u0275cmp=t({type:a,selectors:[["app-galeria"]],decls:2,vars:0,template:function(e,l){e&1&&(n(0,"p"),o(1,"galeria works!"),i())},encapsulation:2})};export{r as Galeria};

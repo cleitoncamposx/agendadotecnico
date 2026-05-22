@@ -1,0 +1,1 @@
+import{Mb as t,Nb as a,hc as s,pb as n}from"./chunk-E4HIYTSC.js";var m=class o{static \u0275fac=function(e){return new(e||o)};static \u0275cmp=n({type:o,selectors:[["app-novo"]],decls:2,vars:0,template:function(e,p){e&1&&(t(0,"p"),s(1,"novo works!"),a())},encapsulation:2})};export{m as Novo};

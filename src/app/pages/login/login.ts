@@ -1,23 +1,30 @@
-import { Component } from '@angular/core';
-import { PoFieldModule } from '@po-ui/ng-components';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PoButtonModule, PoFieldModule, PoInfoModule } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-login',
-  imports: [PoFieldModule],
+  imports: [ReactiveFormsModule,PoFieldModule, PoButtonModule, PoInfoModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 
 export class Login {
 
-  public titulo: string = 'Titulo';
-  login: string ;
+  private fb = inject(FormBuilder);
+
+  public form = this.fb.group({
+    username: ['', [Validators.required, Validators.minLength(3)]],
+    password: ['', [Validators.required]]
+  });
+
 
   constructor() {
-    this.login = '';
   }
 
-  public fnClick() {
+  public submit = () => {
 
   }
+
+
 }

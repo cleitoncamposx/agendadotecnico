@@ -2,12 +2,16 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 
-import { ApplicationConfig, importProvidersFrom, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, isDevMode, provideAppInitializer } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, isDevMode, provideAppInitializer, inject } from '@angular/core';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 
 import { PoHttpRequestModule } from '@po-ui/ng-components';
 import { provideServiceWorker } from '@angular/service-worker';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { StorageService } from './core/services/storage-service';
+import { Section } from './core/models/section';
+import { environment } from './core/environments/environment.development';
+import { AuthService } from './core/services/auth-service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +29,13 @@ export const appConfig: ApplicationConfig = {
   
 };
 
-const init = () => {
-  console.log('Inicializando...')
+const init = async () => {
+
+  const storageService = inject(StorageService);
+  const authService = inject(AuthService);
+  const section: Section = await storageService.get(environment.STOTAGE_KEY_SECTION) ?? new Section();
+
+  console.log('Section offline', section);
+
+  authService.setSection(section);;
 }

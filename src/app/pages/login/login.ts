@@ -38,8 +38,16 @@ export class Login implements OnDestroy {
     console.log(`username: ${username} - password: ${password}`);
 
     this.sub.add(this.authService.createSection(username, password)
-      .subscribe(section => console.log('section', section)));
-
+      .subscribe({
+        next: (section) => {
+          console.log('Section online', section);
+        },
+        error: (err) => {
+          console.error('Error creating section', err);
+        },
+        complete: () =>{
+          console.log('Completou');
+        }
+      }));
+    }
   }
-
-}

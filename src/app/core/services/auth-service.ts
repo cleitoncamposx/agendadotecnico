@@ -1,7 +1,7 @@
-import { Inject, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { finalize, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Section } from '../models/section';
 import { StorageService } from './storage-service';
 
@@ -14,28 +14,43 @@ export class AuthService {
   private http = inject(HttpClient);
   private storageService = inject(StorageService);
 
-createSection = (
-  username: string,
-  password: string
-): Observable<Section> => {
+  private section = new BehaviorSubject<Section>(new Section());
 
-  const url: string =
-    `${this.urlAuth}?grant_type=password&username=${username}&password=${password}`;
+  public setSection(section: Section): void {
+    this.section.next(section);
+  }
 
-  return this.http.post<Section>(url, null).pipe(
-    tap({
-      next: async (section) => {
-        try {
-          await this.storageService.set<Section>(environment.STOTAGE_KEY_SECTION, section);
-        } catch (e) {
-          console.log('erro de gravação', e);
-        }
-      },
-      error: (err) => {
-        console.log('erro:', err);
-      },
-      finalize: () => console.log('completou')
-    })
-  );
+  public getSection(): Observable<Section> {
+    return this.section.asObservable();
+  }
+
+  createSection(username: string, password: string): Observable<Section> {
+
+    const url: string =
+      `${this.urlAuth}?grant_type=password&username=${username}&password=${password}`;
+
+    return this.http.post<Section>(url, null).pipe(
+      tap({
+        next: async (section) => {
+          try {
+            console.log('seção', section);
+
+            this.setSection(section);
+
+            await this.storageService.set<Section>(
+              environment.STOTAGE_KEY_SECTION,
+              section
+            );
+
+          } catch (e) {
+            console.log('erro de gravação', e);
+          }
+        },
+        error: (err) => {
+          console.log('erro:', err);
+        },
+        finalize: () => {}
+      })
+    );
   }
 }

@@ -1,0 +1,286 @@
+#include "totvs.ch"
+#include "fwmvcdef.ch"
+#include "tlpp-core.th"
+
+namespace custom.app.agenda.api.cadastros
+
+/*/{Protheus.doc} U_GET
+Função para consulta de dados cadastrais
+@type function
+@version  1.0
+@author cleit
+@since 7/12/2026
+
+https://erp:2200/api/custom/app/agenda/cadastros/atendentes
+/*/
+@get(endpoint="custom/app/agenda/cadastros/:recurso", description="API para consulta de dados cadastrais")
+Function U_GET() as logical
+
+	local err     as object
+	local cMsgErr as character
+
+	local cBody   as character
+	local jBody   as json
+	local jHeader as json
+	local jPath   as json
+	local jQuery  as json
+
+	local jResp   as json
+
+	local cRecurso as character
+	local xData    as variant
+	local xRecno   as variant
+
+	try
+
+		err := errorClass():new()
+		cMsgErr := ""
+
+		cBody := oRest:getBodyRequest()
+		jBody := JsonObject():New()
+		jBody:FromJson(cBody)
+
+		jHeader := oRest:getHeaderRequest()
+		jQuery := oRest:getQueryRequest()
+		jPath := oRest:GetPathParamsRequest()
+
+		cRecurso := Upper(AllTrim(jPath["recurso"]))
+
+		If Left(cRecurso, 1) == ":"
+			cRecurso := SubStr(cRecurso, 2)
+		EndIf
+
+		xRecno   := jHeader["recno"]
+
+		if valtype(xRecno) == "U"
+			xRecno := 0
+		ElseIf valtype(xRecno) == "C"
+			xRecno := Val(xRecno)
+		ElseIf valtype(xRecno) == "N"
+			xRecno := xRecno
+		Else
+			xRecno := 0
+		EndIf
+
+		DO CASE
+
+		CASE cRecurso == "ATENDENTES"
+
+			xData := fnGetAtendentes(xRecno)
+
+		OTHERWISE
+
+			err:description := "RECURSO INVALIDO -> " + cRecurso
+			throw err
+
+		ENDCASE
+
+		jResp := JsonObject():New()
+
+		jResp["status"]   := "success"
+		jResp["recurso"]  := cRecurso
+		jResp["mensagem"] := ""
+		jResp["data"]     := xData
+
+		oRest:setResponse(jResp:toJson())
+
+	catch e
+
+		if !Empty(e:description)
+
+			cMsgErr := Alltrim(e:description)
+
+			if !empty(e:errorstack)
+				cMsgErr += CRLF + "ERRORSTACK -> " + left(e:errorstack,500)
+			endif
+
+		endif
+
+		jResp := JsonObject():New()
+		jResp["status"]   := "error"
+		jResp["recurso"]  := cRecurso
+		jResp["mensagem"] := cMsgErr
+		jResp["data"]     := ""
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+Return .t.
+
+	@post(endpoint="custom/app/agenda/cadastros/:recurso", description="API para inclusão de registros")
+Function U_POST() as logical
+
+	local err      as object
+	local cMsgErr  as character
+
+	local cBody    as character
+	local jBody    as json
+	local jHeader  as json
+	local jPath    as json
+	local jQuery   as json
+
+	local jResp    as json
+	local cRecurso as character
+	local cNome    as character
+	local cFuncao  as character
+	local cEmail   as character
+
+	local aCampos  as array
+	local x        as numeric
+	local nRecno   as numeric
+	local cCodigo  as character
+
+	try
+
+		err := errorClass():new()
+		cMsgErr := ""
+
+		cBody := oRest:getBodyRequest()
+		jBody := JsonObject():New()
+		jBody:FromJson(cBody)
+
+		jHeader := oRest:getHeaderRequest()
+		jQuery := oRest:getQueryRequest()
+		jPath := oRest:GetPathParamsRequest()
+
+		cRecurso := Upper(AllTrim(jPath["recurso"]))
+
+		DO CASE
+
+		CASE cRecurso == "ATENDENTES"
+
+			cNome   := jBody["nome"]
+			cFuncao := jBody["funcao"]
+			cEmail  := jBody["email"]
+
+			aCampos := FwSX3Util():getAllFields("AA1", .F.)
+
+			AA1->(dbSetOrder(1), reclock("AA1", .T.))
+
+			for x := 1 to len(aCampos)
+				AA1->(&aCampos[x]) := criavar(aCampos[x], .t.)
+			next x
+
+			AA1->AA1_FILIAL := xFilial("AA1")
+			AA1->AA1_NOMTEC := cNome
+			AA1->AA1_FUNCAO := cFuncao
+			AA1->AA1_EMSIL  := cEmail
+
+			AA1->(MsUnLock())
+
+			if __LSX8
+				confirmsx8()
+			EndIf
+
+            cCodigo := AA1->AA1_CODTEC
+            nRecno  := AA1->(RECNO())
+
+            jAtendente := JsonObject():Nes()
+            jAtendente["id"] := nRecno
+            jAtendente["codigo"] := cCodigo
+            jAtendente["nome"] := cNome
+
+			jResp := JsonObject():New()
+			jResp["status"]   := "success"
+			jResp["mensagem"] := "NOvo atendente incluido com sucesso"
+            jResp["recurso"]  := cRecurso
+			jResp["data"]     := jAtendente
+
+            oRest:setResponse(jResp:toJson())
+
+		OTHERWISE
+
+			err:description := "RECURSO INVALIDO -> " + cRecurso
+			throw err
+
+		ENDCASE
+
+	catch e
+
+		if !Empty(e:description)
+
+			cMsgErr := Alltrim(e:description)
+
+			if !empty(e:errorstack)
+				cMsgErr += CRLF + "ERRORSTACK -> " + left(e:errorstack,500)
+			endif
+
+		endif
+
+		jResp := JsonObject():New()
+		jResp["status"]   := "error"
+		jResp["recurso"]  := cRecurso
+		jResp["mensagem"] := cMsgErr
+		jResp["data"]     := ""
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+Return .t.
+
+	@put(endpoint="custom/app/agenda/cadastros", description="API para inclusão de registros")
+Function U_PUT() as logical
+Return .t.
+
+	@delete(endpoint="custom/app/agenda/cadastros", description="API para exclusão de registros")
+Function U_DELETE() as logical
+Return .t.
+
+
+/*/{Protheus.doc} fnGetAtendentes
+    (long_description)
+    @type  Static Function
+    @author user
+    @since 12/07/2026
+    @version version
+    @param param_name, param_type, param_descr
+    @return return_var, return_type, return_description
+    @example
+    (examples)
+    @see (links_or_references)
+/*/
+Static Function fnGetAtendentes(xRecno as numeric) as variant
+
+	local xData      as variant
+	local jAtendente as json
+	local aCampos    as array
+	local x          as numeric
+
+	if xRecno > 0
+
+		AA1->(dbSetOrder(1), dbGoTo(xRecno))
+		aCampos := FwSX3Util():getAllFields("AA1", .F.)
+
+		xData := JsonObject():New()
+
+		for x := 1 to Len(aCampos)
+
+			cCampo := aCampos[x]
+			xCampo := strTran(Alltrim(getSX3Cache(cCampo, "X3_TITULO"))," ","-")
+			xData[xCampo] := AA1->(&(cCampo))
+
+		Next x
+
+	Else
+		xData := array(0)
+
+		AA1->(dbSetOrder(1), dbSeek(xFilial("AA1")))
+
+		While !AA1->(Eof()) .AND. AA1->AA1_FILIAL == xFilial("AA1")
+
+			jAtendente := JsonObject():New()
+			jAtendente["recno" ] := AA1->(RECNO())
+			jAtendente["filial"] := AA1->AA1_FILIAL
+			jAtendente["codigo"] := Alltrim(AA1->AA1_CODTEC)
+			jAtendente["nome"  ] := Alltrim(AA1->AA1_NOMTEC)
+
+			aAdd(xData, jAtendente)
+
+			AA1->(dbSkip())
+		EndDo
+
+	EndIf
+
+Return xData

@@ -108,7 +108,13 @@ Function U_GET() as logical
 
 Return .t.
 
-	@post(endpoint="custom/app/agenda/cadastros/:recurso", description="API para inclusão de registros")
+/*/{Protheus.doc} U_POST
+MÉTODO POST
+@type function
+@version  1.0
+@author cleiton campos
+@since 14/7/2026
+/*/	@post(endpoint="custom/app/agenda/cadastros/:recurso", description="API para inclusão de registros")
 Function U_POST() as logical
 
 	local err      as object
@@ -159,13 +165,13 @@ Function U_POST() as logical
 			AA1->(dbSetOrder(1), reclock("AA1", .T.))
 
 			for x := 1 to len(aCampos)
-				AA1->(&aCampos[x]) := criavar(aCampos[x], .t.)
+				AA1->&(aCampos[x]) := criavar(aCampos[x], .t.)
 			next x
 
 			AA1->AA1_FILIAL := xFilial("AA1")
 			AA1->AA1_NOMTEC := cNome
 			AA1->AA1_FUNCAO := cFuncao
-			AA1->AA1_EMSIL  := cEmail
+			AA1->AA1_EMAIL  := cEmail
 
 			AA1->(MsUnLock())
 
